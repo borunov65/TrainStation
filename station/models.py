@@ -57,8 +57,16 @@ class Station(models.Model):
 
 
 class Route(models.Model):
-    source = models.ForeignKey("Station", on_delete=models.CASCADE)
-    destination = models.ForeignKey("Station", on_delete=models.CASCADE)
+    source = models.ForeignKey(
+        "Station",
+        on_delete=models.CASCADE,
+        related_name="routes_from"
+    )
+    destination = models.ForeignKey(
+        "Station",
+        on_delete=models.CASCADE,
+        related_name="routes_to"
+    )
     distance = models.DecimalField(max_digits=8, decimal_places=2)
 
     class Meta:
