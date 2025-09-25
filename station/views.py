@@ -13,6 +13,7 @@ from station.serializers import (
     TrainSerializer,
     TrainListSerializer,
     TrainRetrieveSerializer,
+    TrainImageSerializer,
     JourneySerializer,
     JourneyListSerializer,
     JourneyRetrieveSerializer,
@@ -45,6 +46,8 @@ class TrainViewSet(
             return TrainListSerializer
         elif self.action == "retrieve":
             return TrainRetrieveSerializer
+        elif self.action == "upload_image":
+            return TrainImageSerializer
         return TrainSerializer
 
     def get_queryset(self):
