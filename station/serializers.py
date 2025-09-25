@@ -38,6 +38,13 @@ class TrainSerializer(serializers.ModelSerializer):
         )
 
 
+class TrainImageSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Train
+        fields = ("id", "image")
+
+
 class TrainListSerializer(serializers.ModelSerializer):
     train_type = serializers.SlugRelatedField(
         slug_field="name", read_only=True
