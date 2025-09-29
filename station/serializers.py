@@ -196,10 +196,11 @@ class TicketSerializer(serializers.ModelSerializer):
             field_name="seat",
             error_class=ValidationError
         )
+        cargo_obj = attrs["cargo"]
         Ticket.validate_position(
-            attrs["cargo"],
+            cargo_obj.number,
             attrs["journey"].train.cargo_num,
-            field_name="cargo",
+            field_name="cargo number",
             error_class=ValidationError
         )
         return attrs
