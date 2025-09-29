@@ -1,12 +1,13 @@
 import tempfile
 import os
 from PIL import Image
+from django.db import IntegrityError
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient, APITestCase
-from station.models import Train, TrainType, Route, Journey, Station
+from station.models import Train, TrainType, Route, Journey, Station, Cargo
 from station.serializers import (
     TrainListSerializer,
     TrainRetrieveSerializer,
@@ -379,3 +380,35 @@ class AdminTrainTest(TestCase):
         url = journey_detail_url(journey.id)
         res = self.client.delete(url)
         self.assertEqual(res.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
+class CargoModelTests(TestCase):
+    def setUp(self):
+        self.train_type = TrainType.objects.create(name="fast")
+        self.train = Train.objects.create(
+            name="Tavria",
+            cargo_num=0,  # буде оновлюватися сигналами
+            places_in_cargo=50,
+            train_type=self.train_type,
+        )
+
+    def test_create_cargo_with_type(self):
+        cargo = Cargo.objects.create(train=self.train, number=1, cargo_type="coal")
+        self.assertEqual(cargo.cargo_type, "coal")
+        self.assertEqual(cargo.train, self.train)
+
+    def test_cargo_num_auto_update_on_create_and_delete(self):
+        Cargo.objects.create(train=self.train, number=1, cargo_type="coal")
+        Cargo.objects.create(train=self.train, number=2, cargo_type="wood")
+
+        self.train.refresh_from_db()
+        self.assertEqual(self.train.cargo_num, 2)
+
+        Cargo.objects.get(number=1, train=self.train).delete()
+        self.train.refresh_from_db()
+        self.assertEqual(self.train.cargo_num, 1)
+
+    def test_unique_cargo_number_per_train(self):
+        Cargo.objects.create(train=self.train, number=1, cargo_type="coal")
+        with self.assertRaises(IntegrityError):
+            Cargo.objects.create(train=self.train, number=1, cargo_type="wood")
