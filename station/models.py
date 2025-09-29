@@ -1,5 +1,7 @@
 import pathlib
 import uuid
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
 from django.utils.text import slugify
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -25,7 +27,7 @@ class Train(models.Model):
     name = models.CharField(max_length=255, blank=True, null=True)
     cargo_num = models.IntegerField(validators=[MinValueValidator(1)])
     places_in_cargo = models.IntegerField(
-        validators=[MinValueValidator(1), MaxValueValidator(40)]
+        validators=[MinValueValidator(1), MaxValueValidator(160)]
     )
     train_type = models.ForeignKey("TrainType", on_delete=models.CASCADE)
     image = models.ImageField(null=True, upload_to=train_image_path)
@@ -40,10 +42,32 @@ class Train(models.Model):
 
     @property
     def is_small(self):
-        return self.capacity <= 400
+        return self.capacity <= 1000
 
     def __str__(self):
         return f"{self.name or 'Unnamed train'} (id={self.id})"
+
+
+class Cargo(models.Model):
+    train = models.ForeignKey("Train", on_delete=models.CASCADE, related_name="cargos")
+    number = models.PositiveIntegerField()
+    cargo_type = models.CharField(max_length=255)
+
+    class Meta:
+        unique_together = ("train", "number")
+        ordering = ["train", "number"]
+
+    def __str__(self):
+        return f"Cargo {self.number} ({self.cargo_type}) of {self.train}"
+
+
+@receiver([post_save, post_delete], sender=Cargo)
+def update_cargo_num(sender, instance, **kwargs):
+    train = instance.train
+    cargo_count = train.cargos.count()
+    if train.cargo_num != cargo_count:
+        train.cargo_num = cargo_count
+        train.save(update_fields=["cargo_num"])
 
 
 class Station(models.Model):
@@ -136,9 +160,19 @@ class Journey(models.Model):
         return f"{self.route} | {self.departure_time} → {self.arrival_time}"
 
 
+class Order(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Order #{self.id} ({self.user}) at {self.created_at:%Y-%m-%d %H:%M}"
+
 
 class Ticket(models.Model):
-    cargo = models.IntegerField()
+    cargo = models.ForeignKey("Cargo", on_delete=models.CASCADE, related_name="tickets")
     seat = models.IntegerField()
     journey = models.ForeignKey("Journey", on_delete=models.CASCADE, related_name="tickets")
     order = models.ForeignKey("Order", on_delete=models.CASCADE, related_name="tickets")
@@ -153,7 +187,7 @@ class Ticket(models.Model):
         ordering = ("cargo", "seat")
 
     def __str__(self):
-        return f"{self.journey} - (cargo {self.cargo}, seat {self.seat})"
+        return f"{self.journey} - Cargo {self.cargo.number} ({self.cargo.cargo_type}), seat {self.seat}"
 
     @staticmethod
     def validate_position(value: int, max_value: int, field_name: str, error_class):
@@ -167,7 +201,7 @@ class Ticket(models.Model):
             self.seat, self.journey.train.places_in_cargo, "seat", ValidationError
         )
         Ticket.validate_position(
-            self.cargo, self.journey.train.cargo_num, "cargo", ValidationError
+            self.cargo.number, self.journey.train.cargo_num, "cargo number", ValidationError
         )
 
     def save(
@@ -181,14 +215,3 @@ class Ticket(models.Model):
         return super(Ticket, self).save(
             force_insert, force_update, using, update_fields
         )
-
-
-class Order(models.Model):
-    created_at = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-
-    class Meta:
-        ordering = ["-created_at"]
-
-    def __str__(self):
-        return f"Order #{self.id} ({self.user}) at {self.created_at:%Y-%m-%d %H:%M}"
