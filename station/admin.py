@@ -8,6 +8,7 @@ from .models import (
     Crew,
     Ticket,
     Order,
+    Cargo,
 )
 
 
@@ -55,3 +56,9 @@ class JourneyAdmin(admin.ModelAdmin):
 class CrewAdmin(admin.ModelAdmin):
     list_display = ("id", "first_name", "last_name")
     search_fields = ("first_name", "last_name")
+
+
+@admin.register(Cargo)
+class CargoAdmin(admin.ModelAdmin):
+    list_display = ("id", "train", "number", "cargo_type")
+    list_filter = ("cargo_type", "train")
