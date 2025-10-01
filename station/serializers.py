@@ -11,6 +11,7 @@ from .models import (
     Crew,
     Ticket,
     Order,
+    Cargo,
 )
 
 
@@ -232,3 +233,9 @@ class TicketListSerializer(TicketSerializer):
 
 class OrderListSerializer(OrderSerializer):
     tickets = TicketListSerializer(read_only=True, many=True)
+
+
+class CargoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Cargo
+        fields = ("id", "train", "number", "cargo_type")
