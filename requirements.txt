@@ -3,3 +3,9 @@ Django==5.2.6
 djangorestframework==3.16.1
 sqlparse==0.5.3
 tzdata==2025.2
+psycopg==3.2.10
+psycopg-binary==3.2.10
+pillow==11.3.0
+djangorestframework
+drf-spectacular
+djangorestframework-simplejwt
