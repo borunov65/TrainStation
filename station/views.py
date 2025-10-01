@@ -8,7 +8,17 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.exceptions import ValidationError
 
-from station.models import TrainType, Train, Journey, Order
+from station.models import (
+    TrainType,
+    Train,
+    Journey,
+    Order,
+    Crew,
+    Ticket,
+    Route,
+    Cargo,
+    Station,
+)
 from station.serializers import (
     TrainTypeSerializer,
     TrainSerializer,
@@ -20,12 +30,42 @@ from station.serializers import (
     JourneyRetrieveSerializer,
     OrderSerializer,
     OrderListSerializer,
+    CrewSerializer,
+    TicketSerializer,
+    RouteSerializer,
+    StationSerializer,
+    CargoSerializer,
 )
 
 
 class TrainTypeViewSet(viewsets.ModelViewSet):
     queryset = TrainType.objects.all()
     serializer_class = TrainTypeSerializer
+
+
+class CrewViewSet(viewsets.ModelViewSet):
+    queryset = Crew.objects.all()
+    serializer_class = CrewSerializer
+
+
+class TicketViewSet(viewsets.ModelViewSet):
+    queryset = Ticket.objects.all()
+    serializer_class = TicketSerializer
+
+
+class RouteViewSet(viewsets.ModelViewSet):
+    queryset = Route.objects.all()
+    serializer_class = RouteSerializer
+
+
+class StationViewSet(viewsets.ModelViewSet):
+    queryset = Station.objects.all()
+    serializer_class = StationSerializer
+
+
+class CargoViewSet(viewsets.ModelViewSet):
+    queryset = Cargo.objects.all()
+    serializer_class = CargoSerializer
 
 
 class TrainViewSet(
