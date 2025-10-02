@@ -109,7 +109,9 @@ class TrainViewSet(
 
         if places_in_cargo:
             if not places_in_cargo.isdigit():
-                raise ValidationError({"places_in_cargo": "places_in_cargo must be an integer"})
+                raise ValidationError(
+                    {"places_in_cargo": "places_in_cargo must be an integer"}
+                )
             queryset = queryset.filter(places_in_cargo=int(places_in_cargo))
 
         if self.action in ("list", "retrieve"):
@@ -164,7 +166,11 @@ class JourneyViewSet(
         queryset = self.queryset
         if self.action == "list":
             queryset = queryset.select_related("train", "route").annotate(
-                tickets_available=F("train__cargo_num") * F("train__places_in_cargo") - Count("tickets")
+                tickets_available=F(
+                    "train__cargo_num"
+                ) * F(
+                    "train__places_in_cargo"
+                ) - Count("tickets")
             )
 
         train_ids = self.request.query_params.get("train")

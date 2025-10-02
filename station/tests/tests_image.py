@@ -5,8 +5,8 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from rest_framework import status
 from rest_framework.reverse import reverse
-from rest_framework.test import APIClient, APITestCase
-from station.models import Train, TrainType, Route, Journey, Station, Cargo
+from rest_framework.test import APIClient
+from station.models import Train, TrainType, Route, Journey, Station
 
 
 TRAIN_URL = reverse("station:train-list")
@@ -24,7 +24,9 @@ def journey_detail_url(journey_id):
 def sample_train(**params):
     train_type = params.pop("train_type", None)
     if train_type is None:
-        train_type = TrainType.objects.create(name=f"Type_{TrainType.objects.count() + 1}")
+        train_type = TrainType.objects.create(
+            name=f"Type_{TrainType.objects.count() + 1}"
+        )
 
     defaults = {
         "name": "Test Train",
@@ -42,6 +44,7 @@ def sample_station(name=None, latitude=50.0, longitude=30.0):
         name = f"Station_{uuid4().hex[:6]}"
     return Station.objects.create(name=name, latitude=latitude, longitude=longitude)
 
+
 def sample_route(**params):
     defaults = {
         "source": params.pop("source", sample_station()),
@@ -57,7 +60,9 @@ def sample_journey(**params):
     train = params.pop("train", None)
 
     if train is None:
-        train_type = TrainType.objects.create(name=f"Type_{TrainType.objects.count() + 1}")
+        train_type = TrainType.objects.create(
+            name=f"Type_{TrainType.objects.count() + 1}"
+        )
         train = sample_train(train_type=train_type)
 
     defaults = {
@@ -74,8 +79,10 @@ def sample_journey(**params):
 def image_upload_url(train_id):
     return reverse("station:train-upload-image", args=[train_id])
 
+
 def detail_url(train_id):
     return reverse("station:train-detail", args=[train_id])
+
 
 class TrainImageUploadTests(TestCase):
     def setUp(self):
@@ -165,7 +172,6 @@ class TrainImageUploadTests(TestCase):
         self.train.refresh_from_db()
         res = self.client.get(TRAIN_URL)
 
-        # Якщо у тебе пагінація DRF, список може бути всередині 'results'
         data = res.data.get('results', res.data)
 
         self.assertGreater(len(data), 0, "Train list should not be empty")

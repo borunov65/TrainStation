@@ -43,6 +43,7 @@ def sample_station(name=None, latitude=50.0, longitude=30.0):
         name = f"Station_{uuid4().hex[:6]}"
     return Station.objects.create(name=name, latitude=latitude, longitude=longitude)
 
+
 def sample_route(**params):
     defaults = {
         "source": params.pop("source", sample_station()),
@@ -58,7 +59,9 @@ def sample_journey(**params):
     train = params.pop("train", None)
 
     if train is None:
-        train_type = TrainType.objects.create(name=f"Type_{TrainType.objects.count() + 1}")
+        train_type = TrainType.objects.create(
+            name=f"Type_{TrainType.objects.count() + 1}"
+        )
         train = sample_train(train_type=train_type)
 
     defaults = {
@@ -244,7 +247,7 @@ class AuthenticatedTrainApiTests(TestCase):
         train_type_1 = TrainType.objects.create(name="fast")
         train_type_2 = TrainType.objects.create(name="night")
 
-        train_default = sample_train(name="default", train_type= train_type_default )
+        train_default = sample_train(name="default", train_type=train_type_default)
         train_1 = sample_train(name="Tavria", train_type=train_type_1)
         train_2 = sample_train(name="Podillia", train_type=train_type_2)
 
@@ -360,7 +363,6 @@ class AdminTrainTest(TestCase):
 
         journey = Journey.objects.get(id=res.data["id"])
 
-
         self.assertEqual(journey.route.id, payload["route"])
         self.assertEqual(journey.train.id, payload["train"])
         self.assertEqual(
@@ -387,7 +389,7 @@ class CargoModelTests(TestCase):
         self.train_type = TrainType.objects.create(name="fast")
         self.train = Train.objects.create(
             name="Tavria",
-            cargo_num=0,  # буде оновлюватися сигналами
+            cargo_num=0,
             places_in_cargo=50,
             train_type=self.train_type,
         )

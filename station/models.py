@@ -88,7 +88,8 @@ class Station(models.Model):
         ]
 
     def __str__(self):
-        return f"Station: {self.name} (id = {self.id}, {self.latitude}, {self.longitude})"
+        return (f"Station: {self.name} (id = {self.id}, "
+                f"{self.latitude}, {self.longitude})")
 
 
 class Route(models.Model):
@@ -174,7 +175,11 @@ class Order(models.Model):
 class Ticket(models.Model):
     cargo = models.ForeignKey("Cargo", on_delete=models.CASCADE, related_name="tickets")
     seat = models.IntegerField()
-    journey = models.ForeignKey("Journey", on_delete=models.CASCADE, related_name="tickets")
+    journey = models.ForeignKey(
+        "Journey",
+        on_delete=models.CASCADE,
+        related_name="tickets"
+    )
     order = models.ForeignKey("Order", on_delete=models.CASCADE, related_name="tickets")
 
     class Meta:
@@ -187,13 +192,18 @@ class Ticket(models.Model):
         ordering = ("cargo", "seat")
 
     def __str__(self):
-        return f"{self.journey} - Cargo {self.cargo.number} ({self.cargo.cargo_type}), seat {self.seat}"
+        return (f"{self.journey} - "
+                f"Cargo {self.cargo.number} ({self.cargo.cargo_type}), "
+                f"seat {self.seat}")
 
     @staticmethod
     def validate_position(value: int, max_value: int, field_name: str, error_class):
         if not (1 <= value <= max_value):
             raise error_class(
-                {field_name: f"{field_name} must be in range [1, {max_value}], not {value}"}
+                {
+                    field_name:
+                        f"{field_name} must be in range [1, {max_value}], not {value}"
+                }
             )
 
     def clean(self):
@@ -201,7 +211,9 @@ class Ticket(models.Model):
             self.seat, self.journey.train.places_in_cargo, "seat", ValidationError
         )
         Ticket.validate_position(
-            self.cargo.number, self.journey.train.cargo_num, "cargo number", ValidationError
+            self.cargo.number,
+            self.journey.train.cargo_num,
+            "cargo number", ValidationError
         )
 
     def save(

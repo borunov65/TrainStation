@@ -9,6 +9,7 @@ from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 TRAIN_URL = "/api/station/trains/"
 JOURNEY_URL = "/api/station/journeys/"
 
+
 @override_settings(REST_FRAMEWORK={
     "DEFAULT_THROTTLE_CLASSES": [
         "rest_framework.throttling.AnonRateThrottle",
@@ -74,7 +75,6 @@ class ThrottlingTests(APITestCase):
 
         res = self.client.get(TRAIN_URL)
         self.assertEqual(res.status_code, status.HTTP_429_TOO_MANY_REQUESTS)
-
 
     def test_journey_authenticated_throttle(self):
         """Authenticated users: 30 requests/min"""
