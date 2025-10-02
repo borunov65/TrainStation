@@ -1,6 +1,5 @@
 
-# Name of the project
-> Train Station API
+# Train Station API
 
 Django REST API project for managing trains, routes and users writen in DRF. 
 
