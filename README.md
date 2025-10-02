@@ -2,11 +2,11 @@
 # Name of the project
 > Train Station API
 
-Django REST API project for managing trains, routes and users writen on DRF. 
+Django REST API project for managing trains, routes and users writen in DRF. 
 
 ## Installing using GitHub
 
-Install PostgresSQL and create db.
+Install PostgreSQL and create a database.
 You can clone the repository with a single command:
 
 ```shell
@@ -38,7 +38,14 @@ You can also pull the prebuilt image from Docker Hub:
 
 ```shell
 docker pull borunov65/train-station:latest
-docker run -p 8000:8000 borunov65/train-station:latest
+docker run -it -p 8000:8000 ^
+  -e POSTGRES_DB=station ^
+  -e POSTGRES_USER=station ^
+  -e POSTGRES_PASSWORD=station ^
+  -e POSTGRES_HOST=db ^
+  -e POSTGRES_PORT=5432 ^
+  borunov65/train-station ^
+  python manage.py runserver 0.0.0.0:8000
 ```
 
 ### Getting access
@@ -60,7 +67,7 @@ docker compose exec station python manage.py test
 * Managing orders and tickets
 * Creates trains with train types and cargos with cargos types
 * Creates routes with stations and distances
-* Creates journeys with routes, trains, crews and tims of departure and arrival
+* Creates journeys with routes, trains, crews and times of departure and arrival
 * Filtering trains and journeys
 
 ## Author
